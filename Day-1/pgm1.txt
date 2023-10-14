@@ -1,0 +1,32 @@
+import requests
+from bs4 import BeautifulSoup
+
+def search_word(word):
+    url = f"https://www.lexico.com/en/definition/{word}"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        definitions = soup.find_all("span", class_="ind")
+
+        if definitions:
+            for i, definition in enumerate(definitions):
+                print(f"{i + 1}. {definition.text.strip()}")
+        else:
+            print("No definitions found. Did you mean:")
+            suggestions = soup.find("ul", class_="suggestedWords")
+            if suggestions:
+                suggested_words = [suggestion.text.strip() for suggestion in suggestions.find_all("li")]
+                for i, word in enumerate(suggested_words):
+                    print(f"{i + 1}. {word}")
+            else:
+                print("No suggestions available.")
+    else:
+        print("Failed to fetch data from the dictionary.")
+
+if __name__ == "__main__":
+    while True:
+        word = input("Enter a word to look up (or 'exit' to quit): ").lower()
+        if word == 'exit':
+            break
+        search_word(word)
